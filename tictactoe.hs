@@ -69,9 +69,9 @@ move key elem = do
   currentPlayer <- use player 
   elem          <- use element  
   let newRightPos = moveCursor MoveRight pos
-      newLeftPos  = moveCursor MoveLeft pos
-      newDownPos  = moveCursor MoveDown pos 
-      newUpPos    = moveCursor MoveUp pos 
+      newLeftPos  = moveCursor MoveLeft  pos
+      newDownPos  = moveCursor MoveDown  pos 
+      newUpPos    = moveCursor MoveUp    pos 
       newMatrix   = setElem currentPlayer pos matrix 
   case (toLower key) of
     'd'  -> do element    .= getElem (newRightPos^._1) (newRightPos^._2) matrix
