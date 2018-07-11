@@ -162,31 +162,3 @@ play es = do
       return ()      
  
 main = play $ Right initGame
-
-
- 
- 
- 
- 
- 
- 
-
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
