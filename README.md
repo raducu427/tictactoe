@@ -1,2 +1,2 @@
 # tictactoe
-tictactoe game implemented in haskell
+tictactoe console game implemented in haskell
