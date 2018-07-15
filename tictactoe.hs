@@ -67,7 +67,7 @@ move key elem = do
   matrix        <- use gameMatrix
   pos           <- use position
   currentPlayer <- use player 
-  pElem         <- use prevElement  
+  prevElem      <- use prevElement  
   let newRightPos = moveCursor MoveRight pos
       newLeftPos  = moveCursor MoveLeft  pos
       newDownPos  = moveCursor MoveDown  pos 
@@ -76,21 +76,21 @@ move key elem = do
   case (toLower key) of
     'd'  -> do prevElement .= getElem (newRightPos^._1) (newRightPos^._2) matrix
                gameMatrix  %= (setElem cursor newRightPos)
-               gameMatrix  %= (setElem pElem pos)  
+               gameMatrix  %= (setElem prevElem pos)  
                position    .= newRightPos
     'a'  -> do prevElement .= getElem (newLeftPos^._1)  (newLeftPos^._2)  matrix
                gameMatrix  %= (setElem cursor newLeftPos)
-               gameMatrix  %= (setElem pElem pos)  
+               gameMatrix  %= (setElem prevElem pos)  
                position    .= newLeftPos     
     's'  -> do prevElement .= getElem (newDownPos^._1)  (newDownPos^._2)  matrix
                gameMatrix  %= (setElem cursor newDownPos)
-               gameMatrix  %= (setElem pElem pos)  
+               gameMatrix  %= (setElem prevElem pos)  
                position    .= newDownPos
     'w'  -> do prevElement .= getElem (newUpPos^._1)    (newUpPos^._2)    matrix
                gameMatrix  %= (setElem cursor newUpPos)
-               gameMatrix  %= (setElem pElem pos)  
+               gameMatrix  %= (setElem prevElem pos)  
                position    .= newUpPos 
-    'p'  -> if pElem < playerX then do 
+    'p'  -> if prevElem < playerX then do 
                gameMatrix  .= newMatrix 
                gameStatus  .= checkGameStatus pos newMatrix currentPlayer
                prevElement .= currentPlayer
