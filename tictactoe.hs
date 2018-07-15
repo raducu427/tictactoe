@@ -6,7 +6,7 @@ import Data.Matrix
 import qualified Data.Vector as V (sum, generate)
 import Data.Char (toLower)
 import Data.List (all)
-import Control.Lens hiding (element)
+import Control.Lens 
 import Control.Monad.State
 import Control.Monad 
 
@@ -76,19 +76,19 @@ move key elem = do
   case (toLower key) of
     'd'  -> do prevElement .= getElem (newRightPos^._1) (newRightPos^._2) matrix
                gameMatrix  %= (setElem cursor newRightPos)
-               gameMatrix  %= (setElem elem pos)  
+               gameMatrix  %= (setElem pElem pos)  
                position    .= newRightPos
     'a'  -> do prevElement .= getElem (newLeftPos^._1)  (newLeftPos^._2)  matrix
                gameMatrix  %= (setElem cursor newLeftPos)
-               gameMatrix  %= (setElem elem pos)  
+               gameMatrix  %= (setElem pElem pos)  
                position    .= newLeftPos     
     's'  -> do prevElement .= getElem (newDownPos^._1)  (newDownPos^._2)  matrix
                gameMatrix  %= (setElem cursor newDownPos)
-               gameMatrix  %= (setElem elem pos)  
+               gameMatrix  %= (setElem pElem pos)  
                position    .= newDownPos
     'w'  -> do prevElement .= getElem (newUpPos^._1)    (newUpPos^._2)    matrix
                gameMatrix  %= (setElem cursor newUpPos)
-               gameMatrix  %= (setElem elem pos)  
+               gameMatrix  %= (setElem pElem pos)  
                position    .= newUpPos 
     'p'  -> if pElem < playerX then do 
                gameMatrix  .= newMatrix 
