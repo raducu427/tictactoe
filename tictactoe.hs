@@ -52,7 +52,7 @@ switchPlayer currentPlayer = if currentPlayer == playerX then playerO else playe
 
 transition :: Game -> Char -> Either Game Game
 transition game0 c = 
-    let game1 = execState (move c (game0^.element)) game0
+    let game1 = execState (move c) game0
     in if (game1^.gameStatus) == playing then Right game1 else Left game1 
 
 moveCursor :: Direction -> CursorPosition -> CursorPosition
@@ -62,7 +62,7 @@ moveCursor dir pos = case dir of
   MoveDown  -> (pos^._1 `mod` n + 1, pos^._2)      
   MoveUp    -> ((pos^._1 + (-1)*(n + 2)) `mod` n + 1, pos^._2)        
 
-move :: Char -> Int -> State Game () 
+move :: Char -> State Game () 
 move key elem = do
   matrix        <- use gameMatrix
   pos           <- use position
