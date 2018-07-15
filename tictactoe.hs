@@ -16,7 +16,7 @@ type GameStatus = Int
 data Direction = MoveRight | MoveLeft | MoveDown | MoveUp
  
 data Game = Game { _gameMatrix :: Matrix Int
-                 , _element :: Int  -- plays the role of the previous element
+                 , _prevElement :: Int  
                  , _position :: CursorPosition
                  , _player :: Player
                  , _gameStatus :: GameStatus
@@ -67,34 +67,34 @@ move key elem = do
   matrix        <- use gameMatrix
   pos           <- use position
   currentPlayer <- use player 
-  elem          <- use element  
+  pElem         <- use prevElement  
   let newRightPos = moveCursor MoveRight pos
       newLeftPos  = moveCursor MoveLeft  pos
       newDownPos  = moveCursor MoveDown  pos 
       newUpPos    = moveCursor MoveUp    pos 
       newMatrix   = setElem currentPlayer pos matrix 
   case (toLower key) of
-    'd'  -> do element    .= getElem (newRightPos^._1) (newRightPos^._2) matrix
-               gameMatrix %= (setElem cursor newRightPos)
-               gameMatrix %= (setElem elem pos)  
-               position   .= newRightPos
-    'a'  -> do element    .= getElem (newLeftPos^._1)  (newLeftPos^._2)  matrix
-               gameMatrix %= (setElem cursor newLeftPos)
-               gameMatrix %= (setElem elem pos)  
-               position   .= newLeftPos     
-    's'  -> do element    .= getElem (newDownPos^._1)  (newDownPos^._2)  matrix
-               gameMatrix %= (setElem cursor newDownPos)
-               gameMatrix %= (setElem elem pos)  
-               position   .= newDownPos
-    'w'  -> do element    .= getElem (newUpPos^._1)    (newUpPos^._2)    matrix
-               gameMatrix %= (setElem cursor newUpPos)
-               gameMatrix %= (setElem elem pos)  
-               position   .= newUpPos 
-    'p'  -> if elem < playerX then do 
-               gameMatrix .= newMatrix 
-               gameStatus .= checkGameStatus pos newMatrix currentPlayer
-               element    .= currentPlayer
-               player     %= switchPlayer               
+    'd'  -> do prevElement .= getElem (newRightPos^._1) (newRightPos^._2) matrix
+               gameMatrix  %= (setElem cursor newRightPos)
+               gameMatrixc %= (setElem elem pos)  
+               position    .= newRightPos
+    'a'  -> do prevElement .= getElem (newLeftPos^._1)  (newLeftPos^._2)  matrix
+               gameMatrix  %= (setElem cursor newLeftPos)
+               gameMatrix  %= (setElem elem pos)  
+               position    .= newLeftPos     
+    's'  -> do prevElement .= getElem (newDownPos^._1)  (newDownPos^._2)  matrix
+               gameMatrix  %= (setElem cursor newDownPos)
+               gameMatrix  %= (setElem elem pos)  
+               position    .= newDownPos
+    'w'  -> do prevElement .= getElem (newUpPos^._1)    (newUpPos^._2)    matrix
+               gameMatrix  %= (setElem cursor newUpPos)
+               gameMatrix  %= (setElem elem pos)  
+               position    .= newUpPos 
+    'p'  -> if pElem < playerX then do 
+               gameMatrix  .= newMatrix 
+               gameStatus  .= checkGameStatus pos newMatrix currentPlayer
+               prevElement .= currentPlayer
+               player      %= switchPlayer               
             else return ()             
     otherwise -> return ()               
                                                    
