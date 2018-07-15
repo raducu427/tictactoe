@@ -63,7 +63,7 @@ moveCursor dir pos = case dir of
   MoveUp    -> ((pos^._1 + (-1)*(n + 2)) `mod` n + 1, pos^._2)        
 
 move :: Char -> State Game () 
-move key elem = do
+move key = do
   matrix        <- use gameMatrix
   pos           <- use position
   currentPlayer <- use player 
