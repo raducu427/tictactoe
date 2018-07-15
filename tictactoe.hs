@@ -150,15 +150,15 @@ input = do
     return c  
             
 play :: Either Game Game -> IO ()
-play es = do
+play eitherGame = do
   return initGetCharNoBuffering
-  case es of
-    Right s   -> do 
-      render es
+  case eitherGame of
+    Right game -> do 
+      render eitherGame
       c <- input 
-      play $ transition s c
+      play $ transition game c
     otherwise -> do
-      render es
+      render eitherGame
       return ()      
  
 main = play $ Right initGame
