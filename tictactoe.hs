@@ -76,7 +76,7 @@ move key elem = do
   case (toLower key) of
     'd'  -> do prevElement .= getElem (newRightPos^._1) (newRightPos^._2) matrix
                gameMatrix  %= (setElem cursor newRightPos)
-               gameMatrixc %= (setElem elem pos)  
+               gameMatrix  %= (setElem elem pos)  
                position    .= newRightPos
     'a'  -> do prevElement .= getElem (newLeftPos^._1)  (newLeftPos^._2)  matrix
                gameMatrix  %= (setElem cursor newLeftPos)
