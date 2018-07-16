@@ -68,12 +68,11 @@ move key = do
     gameMatrix  %= (setElem cursor (newPos c pos))
     gameMatrix  %= (setElem prevElem pos)  
     position    .= newPos c pos   
-  else if c == 'p' then if prevElem < playerX then do 
+  else if c == 'p' && prevElem < playerX then do 
     gameMatrix  .= newMatrix 
     gameStatus  .= checkGameStatus pos newMatrix currentPlayer
     prevElement .= currentPlayer
     player      %= switchPlayer               
-    else return ()  
   else return ()       
                                                    
 printGrid :: (Matrix Int) -> IO ()
