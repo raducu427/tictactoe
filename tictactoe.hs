@@ -34,10 +34,8 @@ checkGameStatus :: CursorPosition -> Matrix Int -> Player -> GameStatus
 checkGameStatus pos matrix currentPlayer = 
   let antiDiagonal matrix = V.generate n $ \i -> matrix!(i + 1, n - i)
       antiTrace matrix = V.sum (antiDiagonal matrix)
-      r = (V.sum (getRow (pos^._1) matrix) * V.sum (getCol (pos^._2) matrix) * trace matrix * antiTrace matrix) `mod` currentPlayer 
-  in if r == 0 then currentPlayer else 
-     if all (\e -> e > empty) (toList matrix) then draw 
-     else playing     
+  in if (V.sum (getRow (pos^._1) matrix) * V.sum (getCol (pos^._2) matrix) * trace matrix * antiTrace matrix) `mod` currentPlayer == 0 
+     then currentPlayer else if all (> empty) (toList matrix) then draw else playing     
        
 switchPlayer :: Player -> Player
 switchPlayer currentPlayer = if currentPlayer == playerX then playerO else playerX 
@@ -58,36 +56,25 @@ move key = do
   matrix        <- use gameMatrix
   pos           <- use position
   currentPlayer <- use player 
-  prevElem      <- use prevElement  
-  let newRightPos = moveCursor MoveRight pos
-      newLeftPos  = moveCursor MoveLeft  pos
-      newDownPos  = moveCursor MoveDown  pos 
-      newUpPos    = moveCursor MoveUp    pos 
-      newMatrix   = setElem currentPlayer pos matrix 
-  case (toLower key) of
-    'd'  -> do prevElement .= getElem (newRightPos^._1) (newRightPos^._2) matrix
-               gameMatrix  %= (setElem cursor newRightPos)
-               gameMatrix  %= (setElem prevElem pos)  
-               position    .= newRightPos
-    'a'  -> do prevElement .= getElem (newLeftPos^._1)  (newLeftPos^._2)  matrix
-               gameMatrix  %= (setElem cursor newLeftPos)
-               gameMatrix  %= (setElem prevElem pos)  
-               position    .= newLeftPos     
-    's'  -> do prevElement .= getElem (newDownPos^._1)  (newDownPos^._2)  matrix
-               gameMatrix  %= (setElem cursor newDownPos)
-               gameMatrix  %= (setElem prevElem pos)  
-               position    .= newDownPos
-    'w'  -> do prevElement .= getElem (newUpPos^._1)    (newUpPos^._2)    matrix
-               gameMatrix  %= (setElem cursor newUpPos)
-               gameMatrix  %= (setElem prevElem pos)  
-               position    .= newUpPos 
-    'p'  -> if prevElem < playerX then do 
-               gameMatrix  .= newMatrix 
-               gameStatus  .= checkGameStatus pos newMatrix currentPlayer
-               prevElement .= currentPlayer
-               player      %= switchPlayer               
-            else return ()             
-    otherwise -> return ()               
+  prevElem      <- use prevElement 
+  let newPos c | c == 'd' = moveCursor MoveRight
+               | c == 'a' = moveCursor MoveLeft
+               | c == 's' = moveCursor MoveDown
+               | c == 'w' = moveCursor MoveUp 
+      newMatrix = setElem currentPlayer pos matrix 
+      c = toLower key
+  if c `elem` ['d','a','s','w'] then do
+    prevElement .= uncurry getElem (newPos c pos) matrix     
+    gameMatrix  %= (setElem cursor (newPos c pos))
+    gameMatrix  %= (setElem prevElem pos)  
+    position    .= newPos c pos   
+  else if c == 'p' then if prevElem < playerX then do 
+    gameMatrix  .= newMatrix 
+    gameStatus  .= checkGameStatus pos newMatrix currentPlayer
+    prevElement .= currentPlayer
+    player      %= switchPlayer               
+    else return ()  
+  else return ()       
                                                    
 printGrid :: (Matrix Int) -> IO ()
 printGrid = printLists . toLists where
@@ -118,8 +105,7 @@ render eitherGame = do
       printGrid (game^.gameMatrix)
       replicateM_ 3 (putChar '\n')    
       if      (game^.gameStatus) == playerX then putStr "player X won"
-      else if (game^.gameStatus) == playerO then putStr "player O won"
-                                            else putStr "draw"
+      else if (game^.gameStatus) == playerO then putStr "player O won" else putStr "draw"
             
 play :: Either Game Game -> IO ()
 play eitherGame = do
