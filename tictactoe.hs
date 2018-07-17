@@ -73,23 +73,23 @@ move key = do
     gameStatus  .= checkGameStatus pos newMatrix currentPlayer
     prevElement .= currentPlayer
     player      %= switchPlayer               
-  else return ()       
-                                                   
+  else return ()         
+
 printGrid :: (Matrix Int) -> IO ()
-printGrid = printLists . toLists where
-  printLists []     = return ()
-  printLists (l:[]) = printList l
-  printLists (l:ls) = do {printList l; printDashes (2*(length l) - 1); printLists ls}
-  printList []      = return ()
-  printList (e:[])  = do {prinContent e; putChar '\n'}
-  printList (e:es)  = do {prinContent e; putChar '|'; printList es}    
-  printDashes n     = do {replicateM_ n  (putChar '-'); putChar '\n'}
+printGrid = zipWithM_ zipper [1..] . toList where
+  zipper i e = do
+    prinContent e
+    if i `mod` 3 == 0 then do
+      putChar '\n'
+      printDashes $ 2 * n - 1
+    else putChar '|' 
+  printDashes n = replicateM_ n  (putChar '-') *> putChar '\n'
   prinContent e 
     | e == playerX = putChar 'X'
     | e == playerO = putChar 'O'
     | e == cursor  = putChar '*'
-    | e == empty   = putChar ' '    
-               
+    | e == empty   = putChar ' ' 
+                  
 render :: Either Game Game -> IO ()
 render eitherGame = do  
   clearScreen
@@ -103,12 +103,11 @@ render eitherGame = do
     Left game  -> do
       printGrid (game^.gameMatrix)
       replicateM_ 3 (putChar '\n')    
-      if      (game^.gameStatus) == playerX then putStr "player X won"
-      else if (game^.gameStatus) == playerO then putStr "player O won" else putStr "draw"
+      if      (game^.gameStatus) == playerX then putStrLn "player X won"
+      else if (game^.gameStatus) == playerO then putStrLn "player O won" else putStrLn "draw"
             
 play :: Either Game Game -> IO ()
 play eitherGame = do
-  return initGetCharNoBuffering
   case eitherGame of
     Right game -> do 
       render eitherGame
@@ -118,4 +117,4 @@ play eitherGame = do
       render eitherGame
       return ()        
  
-main = play $ Right initGame
+main = return initGetCharNoBuffering <* play $ Right initGame
