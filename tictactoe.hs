@@ -83,7 +83,7 @@ printGrid = zipWithM_ zipper [1..] . toList where
       putChar '\n'
       printDashes $ 2 * n - 1
     else putChar '|' 
-  printDashes n = replicateM_ n  (putChar '-') *> putChar '\n'
+  printDashes n = do { replicateM_ n (putChar '-');  putChar '\n' }   
   prinContent e 
     | e == playerX = putChar 'X'
     | e == playerO = putChar 'O'
@@ -117,4 +117,4 @@ play eitherGame = do
       render eitherGame
       return ()        
  
-main = return initGetCharNoBuffering <* play $ Right initGame
+main = do { return initGetCharNoBuffering; play $ Right initGame }
