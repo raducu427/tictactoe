@@ -1,4 +1,6 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE DeriveFunctor    #-}
+{-# LANGUAGE FlexibleContexts #-}
 import System.IO.NoBufferingWorkaround (initGetCharNoBuffering, getCharNoBuffering)
 import System.Console.ANSI (clearScreen, hideCursor, cursorUpLine)
 import Data.Matrix 
@@ -6,6 +8,9 @@ import qualified Data.Vector as V (sum, generate)
 import Data.Char (toLower)
 import Control.Lens 
 import Control.Monad.State
+import Data.Functor.Foldable
+import Control.Monad.Free
+import qualified Control.Monad.Trans.Free as CMTF
 
 type CursorPosition = (Int, Int)
 type Player = Int
@@ -72,7 +77,7 @@ move key = do
     prevElement .= currentPlayer
     player      %= switchPlayer               
   else return ()         
-    
+
 printGrid :: (Matrix Int) -> IO ()
 printGrid = zipWithM_ zipper [1..] . toList where
   zipper i e = do
@@ -83,7 +88,7 @@ printGrid = zipWithM_ zipper [1..] . toList where
     | e == playerX = putChar 'X'
     | e == playerO = putChar 'O'
     | e == cursor  = putChar '*'
-    | e == empty   = putChar ' '     
+    | e == empty   = putChar ' ' 
                   
 render :: Game -> IO ()
 render game = do  
@@ -94,17 +99,23 @@ render game = do
   case game^.status of
     PlayerXwon -> putStr "player X won"      
     PlayerOwon -> putStr "player O won" 
-    Draw       -> putStr "draw"    
+    Draw       -> putStr "draw"     
     Playing    -> do
       if (game^.player) == playerX then putStr "player's X turn"  else putStr "player's O turn"
-      cursorUpLine 8
+      cursorUpLine 8   
+        
+data TerminalF a = TerminalF Game (Char -> a) deriving Functor 
     
-play :: Game -> IO ()
-play game = case game^.status of
-    Playing -> do 
-      render game
-      c <- getCharNoBuffering 
-      play $ transition game c
-    otherwise -> render game
-      
-main = return initGetCharNoBuffering >> play initGame
+run :: Free TerminalF r -> IO () 
+run (Pure r) = return ()
+run (Free (TerminalF game f)) = case game^.status of 
+    Playing   -> render game >> getCharNoBuffering >>= run . f 
+    otherwise -> render game      
+
+play :: Game -> Free TerminalF ()
+play = apo coalg where
+  coalg game = CMTF.Free $ TerminalF game $ \c -> case game^.status of 
+    Playing   -> Right $ transition game c 
+    otherwise -> Left  $ Pure ()  
+    
+main = return initGetCharNoBuffering >> run $ play initGame
