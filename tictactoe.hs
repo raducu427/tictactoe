@@ -9,41 +9,39 @@ import Control.Monad.State
 
 type CursorPosition = (Int, Int)
 type Player = Int
-type GameStatus = Int
+data Status = PlayerXwon | PlayerOwon | Draw | Playing
 data Direction = MoveRight | MoveLeft | MoveDown | MoveUp
  
 data Game = Game { _gameMatrix :: Matrix Int
                  , _prevElement :: Int  
                  , _position :: CursorPosition
                  , _player :: Player
-                 , _gameStatus :: GameStatus
+                 , _status :: Status
                  } 
                  
 makeLenses ''Game
 
-n        =  3  -- matrix dimension
+n        =  3  
 empty    =  2
 cursor   =  1 
 playerX  = 11
 playerO  = 17 
-draw     =  3
-playing  =  4 
-initGame =  Game (setElem cursor (1,1) $ matrix n n $ \(i,j) -> empty) empty (1,1) playerX playing 
+initGame = Game (setElem cursor (1,1) $ matrix n n $ \(i,j) -> empty) empty (1,1) playerX Playing 
 
-checkGameStatus :: CursorPosition -> Matrix Int -> Player -> GameStatus
+checkGameStatus :: CursorPosition -> Matrix Int -> Player -> Status
 checkGameStatus pos matrix currentPlayer = 
   let antiDiagonal matrix = V.generate n $ \i -> matrix!(i + 1, n - i)
       antiTrace matrix = V.sum (antiDiagonal matrix)
   in if (V.sum (getRow (pos^._1) matrix) * V.sum (getCol (pos^._2) matrix) * trace matrix * antiTrace matrix) `mod` currentPlayer == 0 
-     then currentPlayer else if all (> empty) (toList matrix) then draw else playing     
-       
+     then winner currentPlayer else if all (> empty) (toList matrix) then Draw else Playing where
+  winner player = if player == playerX then PlayerXwon else PlayerOwon
+           
 switchPlayer :: Player -> Player
 switchPlayer currentPlayer = if currentPlayer == playerX then playerO else playerX 
 
-transition :: Game -> Char -> Either Game Game
-transition game0 c = let game1 = execState (move c) game0
-    in if (game1^.gameStatus) == playing then Right game1 else Left game1 
-
+transition :: Game -> Char -> Game
+transition game c = execState (move c) game
+    
 moveCursor :: Direction -> CursorPosition -> CursorPosition
 moveCursor dir pos = case dir of
   MoveRight -> (pos^._1, pos^._2 `mod` n + 1)
@@ -70,51 +68,43 @@ move key = do
     position    .= newPos c pos   
   else if c == 'p' && prevElem < playerX then do 
     gameMatrix  .= newMatrix 
-    gameStatus  .= checkGameStatus pos newMatrix currentPlayer
+    status      .= checkGameStatus pos newMatrix currentPlayer
     prevElement .= currentPlayer
     player      %= switchPlayer               
   else return ()         
-
+    
 printGrid :: (Matrix Int) -> IO ()
 printGrid = zipWithM_ zipper [1..] . toList where
   zipper i e = do
     prinContent e
-    if i `mod` 3 == 0 then do
-      putChar '\n'
-      printDashes $ 2 * n - 1
-    else putChar '|' 
-  printDashes n = do { replicateM_ n (putChar '-');  putChar '\n' }   
+    if i `mod` 3 == 0 then putChar '\n' >> (printDashes $ 2 * n - 1) else putChar '|'         
+  printDashes n = replicateM_ n (putChar '-') >> putChar '\n'   
   prinContent e 
     | e == playerX = putChar 'X'
     | e == playerO = putChar 'O'
     | e == cursor  = putChar '*'
-    | e == empty   = putChar ' ' 
+    | e == empty   = putChar ' '     
                   
-render :: Either Game Game -> IO ()
-render eitherGame = do  
+render :: Game -> IO ()
+render game = do  
   clearScreen
   hideCursor
-  case eitherGame of
-    Right game -> do
-      printGrid (game^.gameMatrix)
-      replicateM_ 3 (putChar '\n')
-      if (game^.player) == playerX then putStr "player's X turn" else putStr "player's O turn"          
-      cursorUpLine 8 
-    Left game  -> do
-      printGrid (game^.gameMatrix)
-      replicateM_ 3 (putChar '\n')    
-      if      (game^.gameStatus) == playerX then putStrLn "player X won"
-      else if (game^.gameStatus) == playerO then putStrLn "player O won" else putStrLn "draw"
-            
-play :: Either Game Game -> IO ()
-play eitherGame = do
-  case eitherGame of
-    Right game -> do 
-      render eitherGame
+  printGrid (game^.gameMatrix)
+  replicateM_ 3 (putChar '\n')
+  case game^.status of
+    PlayerXwon -> putStr "player X won"      
+    PlayerOwon -> putStr "player O won" 
+    Draw       -> putStr "draw"    
+    Playing    -> do
+      if (game^.player) == playerX then putStr "player's X turn"  else putStr "player's O turn"
+      cursorUpLine 8
+    
+play :: Game -> IO ()
+play game = case game^.status of
+    Playing -> do 
+      render game
       c <- getCharNoBuffering 
       play $ transition game c
-    otherwise -> do
-      render eitherGame
-      return ()        
- 
-main = do { return initGetCharNoBuffering; play $ Right initGame }
+    otherwise -> render game
+      
+main = return initGetCharNoBuffering >> play initGame
