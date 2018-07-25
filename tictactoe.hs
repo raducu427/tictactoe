@@ -107,7 +107,6 @@ render game = do
 data TerminalF a = TerminalF Game (Char -> a) deriving Functor 
     
 run :: Free TerminalF r -> IO () 
-run (Pure r) = return ()
 run (Free (TerminalF game f)) = case game^.status of 
     Playing   -> render game >> getCharNoBuffering >>= run . f 
     otherwise -> render game      
