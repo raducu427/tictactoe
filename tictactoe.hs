@@ -21,16 +21,15 @@ data Game = Game { _gameMatrix :: Matrix Int
                  
 makeLenses ''Game
 
-n        =  3  
 empty    =  2
 cursor   =  1 
 playerX  = 11
 playerO  = 17 
-initGame = Game (setElem cursor (1,1) $ matrix n n $ \(i,j) -> empty) empty (1,1) playerX Playing 
+initGame = Game (setElem cursor (1,1) $ matrix 3 3 $ \(i,j) -> empty) empty (1,1) playerX Playing 
 
 checkGameStatus :: CursorPosition -> Matrix Int -> Player -> Status
 checkGameStatus pos matrix currentPlayer = 
-  let antiDiagonal matrix = V.generate n $ \i -> matrix!(i + 1, n - i)
+  let antiDiagonal matrix = V.generate 3 $ \i -> matrix!(i + 1, 3 - i)
       antiTrace matrix = V.sum (antiDiagonal matrix)
   in if (V.sum (getRow (pos^._1) matrix) * V.sum (getCol (pos^._2) matrix) * trace matrix * antiTrace matrix) `mod` currentPlayer == 0 
      then winner currentPlayer else if all (> empty) (toList matrix) then Draw else Playing where
@@ -44,10 +43,10 @@ transition game c = execState (move c) game
     
 moveCursor :: Direction -> CursorPosition -> CursorPosition
 moveCursor dir pos = case dir of
-  MoveRight -> (pos^._1, pos^._2 `mod` n + 1)
-  MoveLeft  -> (pos^._1, (pos^._2 + (-1)*(n + 2)) `mod` n + 1) 
-  MoveDown  -> (pos^._1 `mod` n + 1, pos^._2)      
-  MoveUp    -> ((pos^._1 + (-1)*(n + 2)) `mod` n + 1, pos^._2)        
+  MoveRight -> (pos^._1,       pos^._2 `mod` 3 + 1)
+  MoveLeft  -> (pos^._1, (pos^._2 - 5) `mod` 3 + 1) 
+  MoveDown  -> (pos^._1 `mod` 3 + 1,       pos^._2)      
+  MoveUp    -> ((pos^._1 - 5) `mod` 3 + 1, pos^._2)        
 
 move :: Char -> State Game () 
 move key = do
@@ -72,18 +71,18 @@ move key = do
     prevElement .= currentPlayer
     player      %= switchPlayer               
   else return ()         
-    
+
 printGrid :: (Matrix Int) -> IO ()
 printGrid = zipWithM_ zipper [1..] . toList where
   zipper i e = do
     prinContent e
-    if i `mod` 3 == 0 then putChar '\n' >> (printDashes $ 2 * n - 1) else putChar '|'         
+    if i `mod` 3 == 0 then putChar '\n' >> (printDashes 5) else putChar '|'         
   printDashes n = replicateM_ n (putChar '-') >> putChar '\n'   
   prinContent e 
     | e == playerX = putChar 'X'
     | e == playerO = putChar 'O'
     | e == cursor  = putChar '*'
-    | e == empty   = putChar ' '     
+    | e == empty   = putChar ' ' 
                   
 render :: Game -> IO ()
 render game = do  
