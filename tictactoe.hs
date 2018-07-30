@@ -83,11 +83,8 @@ render game = do
        
 play :: Game -> IO ()
 play game = case game^.status of
-    Playing   -> render game >> 
-                 getCharNoBuffering >>= \c -> 
-                 play $ transition game c 
+    Playing   -> render game >> getCharNoBuffering >>= \c -> play $ transition game c 
     otherwise -> render game
-   where
-     transition game c = execState (move c) game
+   where transition game c = execState (move c) game
       
 main = return initGetCharNoBuffering >> play initGame
