@@ -79,13 +79,12 @@ move key = do
 
 printGrid :: (Matrix Int) -> IO ()
 printGrid = zipWithM_ zipper [1..] . toList where
-  zipper i e = prinContent e >> if i `mod` 3 == 0 then putChar '\n' >> printDashes 5 else putChar '|'        
+  zipper i e    = prinContent e >> if i `mod` 3 == 0 then putChar '\n' >> printDashes 5 else putChar '|'        
   printDashes n = replicateM_ n (putChar '-') >> putChar '\n'   
-  prinContent e 
-    | e == playerX = putChar 'X'
-    | e == playerO = putChar 'O'
-    | e == cursor  = putChar '*'
-    | e == empty   = putChar ' ' 
+  prinContent e | e == playerX = putChar 'X'
+                | e == playerO = putChar 'O'
+                | e == cursor  = putChar '*'
+                | e == empty   = putChar ' ' 
                   
 render :: Game -> IO ()
 render game = do  
