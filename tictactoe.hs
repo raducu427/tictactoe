@@ -4,11 +4,11 @@
 import System.IO.NoBufferingWorkaround (initGetCharNoBuffering, getCharNoBuffering)
 import System.Console.ANSI (clearScreen, hideCursor, cursorUpLine)
 import Data.Matrix 
-import qualified Data.Vector as V (sum, generate)
+import qualified Data.Vector as V 
 import Data.Char (toLower)
-import Control.Lens 
+import Control.Lens ( (^.), (.=), (%=), use, _1, _2, makeLenses )
 import Control.Monad.State
-import Data.Functor.Foldable
+import Data.Functor.Foldable ( apo )
 import Control.Monad.Free
 import qualified Control.Monad.Trans.Free as CMTF
 
@@ -79,9 +79,7 @@ move key = do
 
 printGrid :: (Matrix Int) -> IO ()
 printGrid = zipWithM_ zipper [1..] . toList where
-  zipper i e = do
-    prinContent e
-    if i `mod` 3 == 0 then putChar '\n' >> (printDashes 5) else putChar '|'         
+  zipper i e = prinContent e >> if i `mod` 3 == 0 then putChar '\n' >> printDashes 5 else putChar '|'        
   printDashes n = replicateM_ n (putChar '-') >> putChar '\n'   
   prinContent e 
     | e == playerX = putChar 'X'
@@ -95,13 +93,11 @@ render game = do
   hideCursor
   printGrid (game^.gameMatrix)
   replicateM_ 3 (putChar '\n')
-  case game^.status of   
-    Playing    -> do
-      if (game^.player) == playerX then putStr "player's X turn"  else putStr "player's O turn"
-      cursorUpLine 8   
+  case game^.status of
+    Playing    -> (if (game^.player) == playerX then putStr "player's X turn" else putStr "player's O turn") >> cursorUpLine 8
     PlayerXwon -> putStr "player X won"      
     PlayerOwon -> putStr "player O won" 
-    Draw       -> putStr "draw" 
+    Draw       -> putStr "draw"  
     
 data TerminalF a = TerminalF Game (Char -> a) deriving Functor 
     
