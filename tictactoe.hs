@@ -9,13 +9,12 @@ import Control.Monad.State
 
 data Status    = PlayerXwon | PlayerOwon | Draw     | Playing
 data Direction = MoveRight  | MoveLeft   | MoveDown | MoveUp
- 
-data Game = Game { _gameMatrix :: Matrix Int
-                 , _prevElement :: Int  
-                 , _position :: (Int, Int)
-                 , _player :: Int
-                 , _status :: Status
-                 } 
+data Game      = Game { _gameMatrix :: Matrix Int
+                      , _prevElement :: Int  
+                      , _position :: (Int, Int)
+                      , _player :: Int
+                      , _status :: Status
+                      } 
                  
 makeLenses ''Game
 
