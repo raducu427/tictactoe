@@ -91,8 +91,7 @@ play = apo coalg where
   coalg game = CMTF.Free $ TerminalF game $ \c -> case game^.status of 
     Playing   -> Right $ transition game c 
     otherwise -> Left  $ Pure () 
-   where
-     transition game c = execState (move c) game   
+   where transition game c = execState (move c) game   
 
 run :: Free TerminalF r -> IO () 
 run (Pure                  r) = return ()
