@@ -2,7 +2,7 @@
 import System.IO.NoBufferingWorkaround ( initGetCharNoBuffering, getCharNoBuffering )
 import System.Console.ANSI ( clearScreen, hideCursor, cursorUpLine )
 import Data.Matrix 
-import qualified Data.Vector as V ( sum, generate )
+import qualified Data.Vector as V 
 import Data.Char (toLower)
 import Control.Lens ( (^.), (.=), (%=), use, _1, _2, makeLenses )
 import Control.Monad.State
