@@ -89,9 +89,8 @@ data TerminalF a = TerminalF Game (Char -> a) deriving Functor
 play :: Game -> Free TerminalF ()
 play = apo coalg where
   coalg game = CMTF.Free $ TerminalF game $ \c -> case game^.status of 
-    Playing   -> Right $ transition game c 
-    otherwise -> Left  $ Pure () 
-   where transition game c = execState (move c) game   
+    Playing   -> Right $ execState (move c) game 
+    otherwise -> Left  $ Pure ()  
 
 run :: Free TerminalF r -> IO () 
 run (Pure                  r) = return ()
