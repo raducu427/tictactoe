@@ -86,45 +86,4 @@ render game = do
 play :: Game -> IO ()
 play game = case game^.status of
     Playing   -> render game >> getChar >>= \c -> play $ execState (move c) game 
-    otherwise -> render game
-      
-
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+    otherwise -> render gam
