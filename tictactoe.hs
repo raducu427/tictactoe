@@ -97,4 +97,4 @@ run (Free (TerminalF game f)) = case game^.status of
     Playing   -> render game >> getCharNoBuffering >>= run . f 
     otherwise -> render game     
     
-main = return initGetCharNoBuffering >> run $ play initGame
+main = initGetCharNoBuffering >> run $ play initGame
