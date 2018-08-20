@@ -96,4 +96,4 @@ run :: Free TerminalF r -> IO ()
 run (Pure                  r) = return ()
 run (Free (TerminalF game f)) = render game >> getCharNoBuffering >>= run . f        
     
-main = return initGetCharNoBuffering >> run $ play initGame
+main = initGetCharNoBuffering >> run $ play initGame
