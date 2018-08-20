@@ -86,4 +86,4 @@ play game = case game^.status of
     Playing   -> render game >> getCharNoBuffering >>= \c -> play $ execState (move c) game 
     otherwise -> render game
       
-main = return initGetCharNoBuffering >> play initGame
+main = initGetCharNoBuffering >> play initGame
