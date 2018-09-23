@@ -1,4 +1,6 @@
-{-# LANGUAGE TemplateHaskell, FlexibleContexts #-}
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE FlexibleContexts  #-}
+
 import System.IO.NoBufferingWorkaround ( initGetCharNoBuffering, getCharNoBuffering )
 import System.Console.ANSI ( clearScreen, hideCursor, cursorUpLine )
 import Data.Matrix 
