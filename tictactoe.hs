@@ -30,12 +30,13 @@ move key = do
   matrix        <- use gameMatrix
   prevElem      <- use prevElement 
   currentPlayer <- use player 
-  let c         = toLower key
-      newMatrix = setElem currentPlayer pos matrix
-      newPos c | c == 'd' = moveCursor MoveRight
-               | c == 'a' = moveCursor MoveLeft
-               | c == 's' = moveCursor MoveDown
-               | c == 'w' = moveCursor MoveUp 
+  let c            = toLower key
+      newMatrix    = setElem currentPlayer pos matrix
+      newPos c 
+        | c == 'd' = moveCursor MoveRight
+        | c == 'a' = moveCursor MoveLeft
+        | c == 's' = moveCursor MoveDown
+        | c == 'w' = moveCursor MoveUp 
   if c `elem` ['d','a','s','w'] then do
     prevElement .= uncurry getElem (newPos c pos) matrix     
     gameMatrix  %= (setElem cursor (newPos c pos))
@@ -69,13 +70,14 @@ render game = do
     PlayerOwon -> putStr "player O won" 
     Draw       -> putStr "draw" 
    where
-     printGrid                    = zipWithM_ zipper [1..] . toList 
-     zipper i e                   = prinContent e >> if i `mod` 3 == 0 then putChar '\n' >> printDashes 5 else putChar '|'        
-     printDashes n                = replicateM_ n (putChar '-') >> putChar '\n'   
-     prinContent e | e == playerX = putChar 'X'
-                   | e == playerO = putChar 'O'
-                   | e == cursor  = putChar '*'
-                   | e == empty   = putChar ' '      
+     printGrid        = zipWithM_ zipper [1..] . toList 
+     zipper i e       = prinContent e >> if i `mod` 3 == 0 then putChar '\n' >> printDashes 5 else putChar '|'        
+     printDashes n    = replicateM_ n (putChar '-') >> putChar '\n'   
+     prinContent e 
+       | e == playerX = putChar 'X'
+       | e == playerO = putChar 'O'
+       | e == cursor  = putChar '*'
+       | e == empty   = putChar ' '       
        
 play :: Game -> IO ()
 play game = case game^.status of
