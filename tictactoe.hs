@@ -34,12 +34,13 @@ move key = do
   matrix        <- use gameMatrix
   prevElem      <- use prevElement 
   currentPlayer <- use player 
-  let c         = toLower key
-      newMatrix = setElem currentPlayer pos matrix
-      newPos c | c == 'd' = moveCursor MoveRight
-               | c == 'a' = moveCursor MoveLeft
-               | c == 's' = moveCursor MoveDown
-               | c == 'w' = moveCursor MoveUp 
+  let c            = toLower key
+      newMatrix    = setElem currentPlayer pos matrix
+      newPos c 
+        | c == 'd' = moveCursor MoveRight
+        | c == 'a' = moveCursor MoveLeft
+        | c == 's' = moveCursor MoveDown
+        | c == 'w' = moveCursor MoveUp 
   if c `elem` ['d','a','s','w'] then do
     prevElement .= uncurry getElem (newPos c pos) matrix     
     gameMatrix  %= (setElem cursor (newPos c pos))
@@ -62,24 +63,25 @@ move key = do
            antiTrace matrix = V.sum (antiDiagonal matrix)
        in if (V.sum (getRow (fst pos) matrix) * V.sum (getCol (snd pos) matrix) * trace matrix * antiTrace matrix) `mod` currentPlayer == 0 
           then (\player -> if player == playerX then PlayerXwon else PlayerOwon ) currentPlayer 
-          else if all (> empty) (toList matrix) then Draw else Playing 
+          else if all (> empty) (toList matrix) then Draw else Playing    
 
 render :: Game -> IO ()
-render game = do
+render game = do  
   clearScreen >> hideCursor >> printGrid (game^.gameMatrix) >> replicateM_ 3 (putChar '\n')
   case game^.status of
     Playing    -> (if (game^.player) == playerX then putStr "player's X turn" else putStr "player's O turn") >> cursorUpLine 8
-    PlayerXwon -> putStr "player X won"
-    PlayerOwon -> putStr "player O won"
-    Draw       -> putStr "draw"
+    PlayerXwon -> putStr "player X won"      
+    PlayerOwon -> putStr "player O won" 
+    Draw       -> putStr "draw" 
    where
-     printGrid                    = zipWithM_ zipper [1..] . toList
-     zipper i e                   = prinContent e >> if i `mod` 3 == 0 then putChar '\n' >> printDashes 5 else putChar '|'
-     printDashes n                = replicateM_ n (putChar '-') >> putChar '\n'
-     prinContent e | e == playerX = putChar 'X'
-                   | e == playerO = putChar 'O'
-                   | e == cursor  = putChar '*'
-                   | e == empty   = putChar ' '
+     printGrid        = zipWithM_ zipper [1..] . toList 
+     zipper i e       = prinContent e >> if i `mod` 3 == 0 then putChar '\n' >> printDashes 5 else putChar '|'        
+     printDashes n    = replicateM_ n (putChar '-') >> putChar '\n'   
+     prinContent e 
+       | e == playerX = putChar 'X'
+       | e == playerO = putChar 'O'
+       | e == cursor  = putChar '*'
+       | e == empty   = putChar ' '  
 
 data TerminalF a = TerminalF Game (Char -> a) deriving Functor
 
